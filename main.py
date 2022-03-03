@@ -1,10 +1,19 @@
+from operator import truediv
+from pathlib import Path
+from types import NoneType
 from PyQt5.QtWidgets import *
-from PyQt5 import QtGui
+from PyQt5 import QtGui, Qt
 import sys, os
+
+def _files(path):
+    for file in os.listdir(path):
+        if os.path.isfile(os.path.join(path, file)):
+            yield file
 
 class Window(QWidget):
     def __init__(self):
         QWidget.__init__(self)
+        self.opened_file = ""
         self.setWindowTitle("EDocBook")
         self.setWindowIcon(QtGui.QIcon('logo.png'))
         qtRectangle = self.frameGeometry()
@@ -14,55 +23,58 @@ class Window(QWidget):
         self.resize(600, 400)
         if not os.path.isdir("notebooks"):
             os.mkdir("notebooks")
-        layout = QGridLayout()
-        self.setLayout(layout)
+        self.layout = QGridLayout()
+        self.setLayout(self.layout)
         self.listwidget = QListWidget()
-        self.listwidget.insertItem(0, "Red")
-        self.listwidget.insertItem(1, "Orange")
-        self.listwidget.insertItem(2, "Blue")
-        self.listwidget.insertItem(3, "White")
-        self.listwidget.insertItem(4, "Green")
         self.listwidget.itemDoubleClicked.connect(self.clicked)
-        layout.addWidget(self.listwidget,1,0)
-        mylayout = QHBoxLayout()
-        open_button=QPushButton()
-        open_button.setText("Open")
-        open_button.clicked.connect(self.open)
-        new_button=QPushButton()
-        new_button.setText("New")
-        new_button.clicked.connect(self.new)
-        del_button=QPushButton()
-        del_button.setText("Delete")
-        del_button.clicked.connect(self.delete)
-        mylayout.addWidget(open_button)
-        mylayout.addWidget(new_button)
-        mylayout.addWidget(del_button)
-        layout.addLayout(mylayout,2,0)
-        menubar = QMenuBar()
-        layout.addWidget(menubar, 0, 0)
-        actionFile = menubar.addMenu("File")
-        open_action = QAction("Open", self)
-        open_action.triggered.connect(self.open)
-        open_action.setShortcut("Ctrl+O")
-        delete_action = QAction("Delete", self)
-        delete_action.triggered.connect(self.delete)
-        delete_action.setShortcut("Ctrl+D")
-        new_action = QAction("New", self)
-        new_action.triggered.connect(self.new)
-        new_action.setShortcut("Ctrl+N")
-        quit_action = QAction("Quit", self)
-        quit_action.setShortcut("Ctrl+Q")
-        quit_action.triggered.connect(self.quit)
-        actionFile.addAction(open_action)
-        actionFile.addAction(new_action)
-        actionFile.addAction(delete_action)
-        actionFile.addSeparator()
-        actionFile.addAction(quit_action)
-        actionHelp = menubar.addMenu("Help")
-        help_action = QAction("About", self)
-        help_action.setShortcut("Ctrl+I")
-        help_action.triggered.connect(self.info)
-        actionHelp.addAction(help_action)
+        self.layout.addWidget(self.listwidget,1,0)
+        self.mylayout = QHBoxLayout()
+        self.open_button=QPushButton()
+        self.open_button.setText("Open")
+        self.open_button.clicked.connect(self.open)
+        self.new_button=QPushButton()
+        self.new_button.setText("New")
+        self.new_button.clicked.connect(self.new)
+        self.del_button=QPushButton()
+        self.del_button.setText("Delete")
+        self.del_button.clicked.connect(self.delete)
+        self.mylayout.addWidget(self.open_button)
+        self.mylayout.addWidget(self.new_button)
+        self.mylayout.addWidget(self.del_button)
+        self.layout.addLayout(self.mylayout,2,0)
+        self.menubar = QMenuBar()
+        self.layout.addWidget(self.menubar, 0, 0)
+        self.actionFile = self.menubar.addMenu("File")
+        self.open_action = QAction("Open", self)
+        self.open_action.triggered.connect(self.open)
+        self.open_action.setShortcut("Ctrl+O")
+        self.delete_action = QAction("Delete", self)
+        self.delete_action.triggered.connect(self.delete)
+        self.delete_action.setShortcut("Ctrl+D")
+        self.new_action = QAction("New", self)
+        self.new_action.triggered.connect(self.new)
+        self.new_action.setShortcut("Ctrl+N")
+        self.quit_action = QAction("Quit", self)
+        self.quit_action.setShortcut("Ctrl+Q")
+        self.quit_action.triggered.connect(self.quit)
+        self.actionFile.addAction(self.open_action)
+        self.actionFile.addAction(self.new_action)
+        self.actionFile.addAction(self.delete_action)
+        self.sync_action = QAction("Sync Files", self)
+        self.sync_action.setShortcut("Ctrl+S")
+        self.sync_action.triggered.connect(self.sync)
+        self.actionFile.addAction(self.sync_action)
+        self.actionFile.addSeparator()
+        self.actionFile.addAction(self.quit_action)
+        self.actionHelp = self.menubar.addMenu("Help")
+        self.help_action = QAction("About", self)
+        self.help_action.setShortcut("Ctrl+I")
+        self.help_action.triggered.connect(self.info)
+        self.help_action_qt = QAction("About Qt", self)
+        self.help_action_qt.triggered.connect(self.info_qt)
+        self.actionHelp.addAction(self.help_action)
+        self.actionHelp.addAction(self.help_action_qt)
+        self.sync()
 
     def clicked(self, qmodelindex):
         item = self.listwidget.currentItem()
@@ -70,32 +82,79 @@ class Window(QWidget):
 
     def open(self):
         print("o")
+        
 
     def new(self):
+        items = []
+        for i in range(self.listwidget.count()):
+            items.append(self.listwidget.item(i).text())
         text, ok = QInputDialog.getText(self, 'Text Input Dialog', 'Enter document name:')
         if ok and not text == "":
-            self.listwidget.addItem(text)
+            if text in items:
+                QMessageBox.warning(self, "Error", "Notebook already exists.")
+            else:
+                try:
+                    Path('./notebooks/'+text).touch()
+                    self.sync()
+                except Exception as e:
+                    QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
 
     def delete(self):
-        self.listwidget.takeItem(self.listwidget.currentRow())
+        try:
+            if not self.listwidget.item(self.listwidget.currentRow()) == None:
+                item = self.listwidget.item(self.listwidget.currentRow()).text()
+                if item or not item == NoneType:
+                    os.unlink("./notebooks/"+item)
+                    self.sync()
+        except Exception as e:
+            QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
     
+    def sync(self):
+        self.listwidget.clear()
+        for e in _files("./notebooks"):
+            self.listwidget.addItem(e)
+        if self.opened_file:
+            file = open("./notebook/"+self.opened_file, "w")
+            file.write("")
+            file.close()
+        self.listwidget.sortItems()
+
     def quit(self):
         sys.exit(0)
+
+    def info_qt(self):
+        QMessageBox.aboutQt(self, "About Qt")
 
     def info(self):
         dlg = QDialog(self)
         dlg.setWindowTitle("About")
-        layout = QGridLayout()
-        dlg.setLayout(layout)
+        dlg.resize(400, 100)
+        self.layout2 = QGridLayout()
+        self.layout2.setContentsMargins(8,8,8,8)
+        dlg.setLayout(self.layout2)
         info_label = QLabel()
-	
-        info_label.setText("This program is made by Stelios 2022.\nThe project is open source and it is under the MIT License")
-        layout.addWidget(info_label,0,0)
+
+        info_label.setText("This program is made by Stelios 2022.\nThe project is open source and it is under the GPLv3+ License")
+        self.layout2.addWidget(info_label,0,0)
         self.close_button = QPushButton()
         self.close_button.setText("Close")
         self.close_button.clicked.connect(dlg.close)
-        layout.addWidget(self.close_button)
+        self.layout2.addWidget(self.close_button)
         dlg.exec()
+
+    def closeEvent(self, event): 
+        can_exit = QMessageBox.question(self,'', "Save before exiting?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        if can_exit == QMessageBox.Yes:
+            event.ignore()
+            self.sync()
+            sys.exit()
+            
+        elif can_exit == QMessageBox.No:
+            event.accept()
+
+        else:
+            event.ignore()
+
 
 app = QApplication(sys.argv)
 screen = Window()
