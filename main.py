@@ -28,6 +28,9 @@ class Window(QWidget):
         self.listwidget = QListWidget()
         self.listwidget.itemDoubleClicked.connect(self.clicked)
         self.layout.addWidget(self.listwidget,1,0)
+        self.textarea = QTextEdit()
+        self.textarea.setHidden(True)
+        self.layout.addWidget(self.textarea,1,0)
         self.mylayout = QHBoxLayout()
         self.open_button=QPushButton()
         self.open_button.setText("Open")
@@ -81,7 +84,14 @@ class Window(QWidget):
         print(item.text())
 
     def open(self):
-        print("o")
+        try:
+            if not self.listwidget.item(self.listwidget.currentRow()) == None:
+                item = self.listwidget.item(self.listwidget.currentRow()).text()
+                if item or not item == NoneType:
+                    self.enter_edit_mode(item)
+        except Exception as e:
+            QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
+        
         
 
     def new(self):
@@ -154,6 +164,29 @@ class Window(QWidget):
 
         else:
             event.ignore()
+
+    def enter_edit_mode(self, file):
+        self.listwidget.setHidden(True)
+        self.textarea.setHidden(False)
+        self.open_action.setEnabled(False)
+        self.new_action.setEnabled(False)
+        self.delete_action.setEnabled(False)
+        self.new_button.setHidden(True)
+        self.del_button.setHidden(True)
+        self.open_button.setHidden(True)
+        self.opened_file = "./notebooks/"+file
+        self.setWindowTitle("EDocBook - "+file)
+
+    def exit_edit_mode(self):
+        self.listwidget.setHidden(False)
+        self.textarea.setHidden(True)
+        self.open_action.setEnabled(True)
+        self.new_action.setEnabled(True)
+        self.delete_action.setEnabled(True)
+        self.new_button.setHidden(False)
+        self.del_button.setHidden(False)
+        self.open_button.setHidden(False)
+        self.setWindowTitle("EDocBook")
 
 
 app = QApplication(sys.argv)
