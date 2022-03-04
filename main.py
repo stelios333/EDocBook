@@ -170,7 +170,7 @@ class Window(QWidget):
         dlg.setLayout(self.layout2)
         info_label = QLabel()
 
-        info_label.setText("EDocBook is an amazing simple text editor,\nwhich gathers all your notes in one place.\nIt is made by Stelios 2022.\nThe project is open source and it is under the GPLv3+ License")
+        info_label.setText("EDocBook is an amazing simple text editor,\nwhich gathers all your notes in one place.\nIt is made by Stelios333 in 2022.\nThe project is open source and it is under the GPLv3+ License")
         self.layout2.addWidget(info_label,0,0)
         self.close_button = QPushButton()
         self.close_button.setText("Close")
