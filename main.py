@@ -1,8 +1,7 @@
-from operator import truediv
 from pathlib import Path
 from types import NoneType
 from PyQt5.QtWidgets import *
-from PyQt5 import QtGui, Qt
+from PyQt5 import QtGui
 import sys, os
 
 def _files(path):
@@ -34,12 +33,23 @@ class Window(QWidget):
         self.mylayout = QHBoxLayout()
         self.open_button=QPushButton()
         self.open_button.setText("Open")
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.open_button.setIcon(QtGui.QIcon.fromTheme("document-open"))
+        else:
+            self.open_button.setIcon(qApp.style().standardIcon(QStyle.SP_ArrowForward)) 
+
         self.open_button.clicked.connect(self.open)
         self.new_button=QPushButton()
         self.new_button.setText("New")
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.new_button.setIcon(QtGui.QIcon.fromTheme("document-new"))
+        else:
+            self.new_button.setText("+ New")
+
         self.new_button.clicked.connect(self.new)
         self.del_button=QPushButton()
         self.del_button.setText("Delete")
+        self.del_button.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCancelButton))
         self.del_button.clicked.connect(self.delete)
         self.mylayout.addWidget(self.open_button)
         self.mylayout.addWidget(self.new_button)
@@ -48,22 +58,32 @@ class Window(QWidget):
         self.menubar = QMenuBar()
         self.layout.addWidget(self.menubar, 0, 0)
         self.actionFile = self.menubar.addMenu("File")
-        self.open_action = QAction("Open", self)
+        self.open_action = QAction("Open", self)      
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.open_action.setIcon(QtGui.QIcon.fromTheme("document-open"))
+        else:
+            self.open_action.setIcon(qApp.style().standardIcon(QStyle.SP_ArrowForward)) 
+            
         self.open_action.triggered.connect(self.open)
         self.open_action.setShortcut("Ctrl+O")
         self.delete_action = QAction("Delete", self)
         self.delete_action.triggered.connect(self.delete)
+        self.delete_action.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCancelButton))
         self.delete_action.setShortcut("Ctrl+D")
         self.new_action = QAction("New", self)
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.new_action.setIcon(QtGui.QIcon.fromTheme("document-new"))
         self.new_action.triggered.connect(self.new)
         self.new_action.setShortcut("Ctrl+N")
         self.quit_action = QAction("Quit", self)
         self.quit_action.setShortcut("Ctrl+Q")
+        self.quit_action.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCloseButton))
         self.quit_action.triggered.connect(self.quit)
         self.actionFile.addAction(self.open_action)
         self.actionFile.addAction(self.new_action)
         self.actionFile.addAction(self.delete_action)
         self.sync_action = QAction("Sync Files", self)
+        self.sync_action.setIcon(qApp.style().standardIcon(QStyle.SP_BrowserReload))
         self.sync_action.setShortcut("Ctrl+S")
         self.sync_action.triggered.connect(self.sync)
         self.actionFile.addAction(self.sync_action)
@@ -71,9 +91,15 @@ class Window(QWidget):
         self.actionFile.addAction(self.quit_action)
         self.actionHelp = self.menubar.addMenu("Help")
         self.help_action = QAction("About", self)
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.help_action.setIcon(QtGui.QIcon.fromTheme("help-about"))
+        else:
+            self.help_action.setIcon(qApp.style().standardIcon(QStyle.SP_TitleBarContextHelpButton)) 
+            
         self.help_action.setShortcut("Ctrl+I")
         self.help_action.triggered.connect(self.info)
         self.help_action_qt = QAction("About Qt", self)
+        self.help_action_qt.setIcon(qApp.style().standardIcon(QStyle.SP_TitleBarMenuButton)) 
         self.help_action_qt.triggered.connect(self.info_qt)
         self.actionHelp.addAction(self.help_action)
         self.actionHelp.addAction(self.help_action_qt)
