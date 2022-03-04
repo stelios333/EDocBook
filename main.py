@@ -173,7 +173,6 @@ class Window(QWidget):
             QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
 
     def update_menus(self):
-        print("updated")
         if self.listwidget.item(self.listwidget.currentRow()) == None:
             self.rename_action.setEnabled(False)
             self.rename_button.setEnabled(False)
