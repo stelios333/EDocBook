@@ -39,6 +39,7 @@ class Window(QWidget):
         self.layout = QGridLayout()
         self.setLayout(self.layout)
         self.listwidget = QListWidget()
+        self.listwidget.installEventFilter(self)
         self.listwidget.itemDoubleClicked.connect(self.clicked)
         self.layout.addWidget(self.listwidget,1,0)
         self.textarea = QTextEdit()
@@ -62,6 +63,12 @@ class Window(QWidget):
             self.new_button.setText("+ New")
 
         self.new_button.clicked.connect(self.new)
+        self.rename_button=QPushButton()
+        self.rename_button.setText("Rename")
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.rename_button.setIcon(QtGui.QIcon.fromTheme("edit-rename"))
+    
+        self.rename_button.clicked.connect(self.rename)
         self.del_button=QPushButton()
         self.del_button.setText("Delete")
         self.del_button.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCancelButton))
@@ -80,6 +87,7 @@ class Window(QWidget):
         self.mylayout.addWidget(self.sync_button) 
         self.mylayout.addWidget(self.open_button)
         self.mylayout.addWidget(self.new_button)
+        self.mylayout.addWidget(self.rename_button)
         self.mylayout.addWidget(self.del_button)
         self.layout.addLayout(self.mylayout,2,0)
         self.menubar = QMenuBar()
@@ -337,9 +345,22 @@ class Window(QWidget):
                 pass
         else: 
             self.exit_edit_mode()
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.ContextMenu and source is self.listwidget:
+            self.contextmenu = QMenu()
+            self.contextmenu.addAction(self.open_action)
+            self.contextmenu.addAction(self.new_action)
+            self.contextmenu.addAction(self.rename_action)
+            self.contextmenu.addAction(self.delete_action)
+            if self.contextmenu.exec(event.globalPos()):
+                item = source.itemAt(event.pos())
+                print(item)
+            return True
+        return super().eventFilter(source, event)
 
     def enter_edit_mode(self, file):
         self.sync_action.setText("Sync File")
+        self.rename_button.setHidden(True)
         self.sync_button.setHidden(False)
         self.back_button.setHidden(False)
         self.exit_action.setEnabled(True)
@@ -361,6 +382,7 @@ class Window(QWidget):
 
     def exit_edit_mode(self):
         self.sync_action.setText("Sync Files")
+        self.rename_button.setHidden(False)
         self.sync_button.setHidden(True)
         self.back_button.setHidden(True)
         self.exit_action.setEnabled(False)
@@ -380,4 +402,4 @@ class Window(QWidget):
 app = QApplication(sys.argv)
 screen = Window()
 screen.show()
-sys.exit(app.exec_())
+sys.exit(app.exec())
