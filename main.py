@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
 import sys, os
 
+
+
 def _files(path):
     for file in os.listdir(path):
         if os.path.isfile(os.path.join(path, file)):
@@ -20,6 +22,7 @@ class Window(QWidget):
         qtRectangle.moveCenter(centerPoint)
         self.move(qtRectangle.topLeft())
         self.resize(600, 400)
+        self.is_saved = True
         if not os.path.isdir("notebooks"):
             os.mkdir("notebooks")
         self.layout = QGridLayout()
@@ -28,6 +31,7 @@ class Window(QWidget):
         self.listwidget.itemDoubleClicked.connect(self.clicked)
         self.layout.addWidget(self.listwidget,1,0)
         self.textarea = QTextEdit()
+        self.textarea.textChanged.connect(self.set_unsaved_state)
         self.textarea.setHidden(True)
         self.layout.addWidget(self.textarea,1,0)
         self.mylayout = QHBoxLayout()
@@ -51,6 +55,18 @@ class Window(QWidget):
         self.del_button.setText("Delete")
         self.del_button.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCancelButton))
         self.del_button.clicked.connect(self.delete)
+        self.back_button=QPushButton()
+        self.back_button.setText("Back")
+        self.back_button.setIcon(qApp.style().standardIcon(QStyle.SP_ArrowBack))
+        self.back_button.setHidden(True)
+        self.back_button.clicked.connect(self.back_confirm) 
+        self.sync_button=QPushButton()
+        self.sync_button.setText("Sync File")
+        self.sync_button.setIcon(qApp.style().standardIcon(QStyle.SP_BrowserReload))
+        self.sync_button.setHidden(True)
+        self.sync_button.clicked.connect(self.sync) 
+        self.mylayout.addWidget(self.back_button) 
+        self.mylayout.addWidget(self.sync_button) 
         self.mylayout.addWidget(self.open_button)
         self.mylayout.addWidget(self.new_button)
         self.mylayout.addWidget(self.del_button)
@@ -58,6 +74,12 @@ class Window(QWidget):
         self.menubar = QMenuBar()
         self.layout.addWidget(self.menubar, 0, 0)
         self.actionFile = self.menubar.addMenu("File")
+        self.exit_action = QAction("Back", self)
+        self.exit_action.setIcon(qApp.style().standardIcon(QStyle.SP_ArrowBack))
+        self.exit_action.setShortcut("Ctrl+E")
+        self.exit_action.setEnabled(False)
+        self.exit_action.triggered.connect(self.back_confirm)
+        self.actionFile.addAction(self.exit_action)
         self.open_action = QAction("Open", self)      
         if sys.platform == "linux" or sys.platform == "linux2":
             self.open_action.setIcon(QtGui.QIcon.fromTheme("document-open"))
@@ -118,7 +140,8 @@ class Window(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
         
-        
+    def set_unsaved_state(self):
+        self.is_saved = False
 
     def new(self):
         items = []
@@ -150,10 +173,11 @@ class Window(QWidget):
         for e in _files("./notebooks"):
             self.listwidget.addItem(e)
         if self.opened_file:
-            file = open("./notebook/"+self.opened_file, "w")
-            file.write("")
+            file = open(self.opened_file, "w")
+            file.write(self.textarea.toPlainText())
             file.close()
         self.listwidget.sortItems()
+        self.is_saved = True
 
     def quit(self):
         sys.exit(0)
@@ -179,19 +203,41 @@ class Window(QWidget):
         dlg.exec()
 
     def closeEvent(self, event): 
-        can_exit = QMessageBox.question(self,'', "Save before exiting?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-        if can_exit == QMessageBox.Yes:
-            event.ignore()
-            self.sync()
-            sys.exit()
-            
-        elif can_exit == QMessageBox.No:
-            event.accept()
+        if self.is_saved == False:
+            can_exit = QMessageBox.question(self,'', "Save before exiting?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+            if can_exit == QMessageBox.Yes:
+                event.ignore()("")
+                self.sync()
+                sys.exit()
+                
+            elif can_exit == QMessageBox.No:
+                event.accept()
 
+            else:
+                event.ignore()
         else:
-            event.ignore()
+            event.accept()
+    
+    def back_confirm(self):
+        if self.is_saved == False:
+            can_exit = QMessageBox.question(self,'', "Save before exiting?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+            if can_exit == QMessageBox.Yes:
+                self.sync()
+                self.exit_edit_mode()
+                
+            elif can_exit == QMessageBox.No:
+                self.exit_edit_mode()
+
+            else:
+                pass
+        else: 
+            self.exit_edit_mode()
 
     def enter_edit_mode(self, file):
+        self.sync_action.setText("Sync File")
+        self.sync_button.setHidden(False)
+        self.back_button.setHidden(False)
+        self.exit_action.setEnabled(True)
         self.listwidget.setHidden(True)
         self.textarea.setHidden(False)
         self.open_action.setEnabled(False)
@@ -202,8 +248,17 @@ class Window(QWidget):
         self.open_button.setHidden(True)
         self.opened_file = "./notebooks/"+file
         self.setWindowTitle("EDocBook - "+file)
+        _file = open(self.opened_file, "r")
+        file_contents = _file.read()
+        _file.close()
+        self.textarea.setPlainText(file_contents)
+        self.is_saved = True
 
     def exit_edit_mode(self):
+        self.sync_action.setText("Sync Files")
+        self.sync_button.setHidden(True)
+        self.back_button.setHidden(True)
+        self.exit_action.setEnabled(False)
         self.listwidget.setHidden(False)
         self.textarea.setHidden(True)
         self.open_action.setEnabled(True)
@@ -213,6 +268,8 @@ class Window(QWidget):
         self.del_button.setHidden(False)
         self.open_button.setHidden(False)
         self.setWindowTitle("EDocBook")
+        self.textarea.setPlainText("")
+        self.opened_file = ""
 
 
 app = QApplication(sys.argv)
