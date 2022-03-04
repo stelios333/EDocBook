@@ -1,7 +1,12 @@
+from ast import Name
 from pathlib import Path
 from types import NoneType
 from PyQt5.QtWidgets import *
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtCore
+try:
+    from PyQt5 import QtMultimedia
+except ImportError:
+    pass
 import sys, os
 
 
@@ -14,6 +19,12 @@ def _files(path):
 class Window(QWidget):
     def __init__(self):
         QWidget.__init__(self)
+        try:
+            QtMultimedia
+            self.is_multimedia_available = True
+        except NameError:
+            self.is_multimedia_available = False
+
         self.opened_file = ""
         self.setWindowTitle("EDocBook")
         self.setWindowIcon(QtGui.QIcon('logo.png'))
@@ -92,6 +103,11 @@ class Window(QWidget):
         self.delete_action.triggered.connect(self.delete)
         self.delete_action.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCancelButton))
         self.delete_action.setShortcut("Ctrl+D")
+        self.rename_action = QAction("Rename", self)
+        self.rename_action.triggered.connect(self.rename)
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.rename_action.setIcon(QtGui.QIcon.fromTheme("edit-rename"))
+        self.rename_action.setShortcut("Ctrl+R")
         self.new_action = QAction("New", self)
         if sys.platform == "linux" or sys.platform == "linux2":
             self.new_action.setIcon(QtGui.QIcon.fromTheme("document-new"))
@@ -103,6 +119,7 @@ class Window(QWidget):
         self.quit_action.triggered.connect(self.quit)
         self.actionFile.addAction(self.open_action)
         self.actionFile.addAction(self.new_action)
+        self.actionFile.addAction(self.rename_action)
         self.actionFile.addAction(self.delete_action)
         self.sync_action = QAction("Sync Files", self)
         self.sync_action.setIcon(qApp.style().standardIcon(QStyle.SP_BrowserReload))
@@ -128,8 +145,20 @@ class Window(QWidget):
         self.sync()
 
     def clicked(self, qmodelindex):
-        item = self.listwidget.currentItem()
-        print(item.text())
+        try:
+            if not self.listwidget.item(self.listwidget.currentRow()) == None:
+                item = self.listwidget.item(self.listwidget.currentRow()).text()
+                if item or not item == NoneType:
+                    self.enter_edit_mode(item)
+        except Exception as e:
+            if self.is_multimedia_available:
+                fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-App-Error-Critical.ogg") 
+                url = QtCore.QUrl.fromLocalFile(fullpath)
+                content = QtMultimedia.QMediaContent(url)
+                player = QtMultimedia.QMediaPlayer()
+                player.setMedia(content)
+                player.play()
+            QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
 
     def open(self):
         try:
@@ -138,24 +167,77 @@ class Window(QWidget):
                 if item or not item == NoneType:
                     self.enter_edit_mode(item)
         except Exception as e:
+            if self.is_multimedia_available:
+                fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-App-Error-Critical.ogg") 
+                url = QtCore.QUrl.fromLocalFile(fullpath)
+                content = QtMultimedia.QMediaContent(url)
+                player = QtMultimedia.QMediaPlayer()
+                player.setMedia(content)
+                player.play()
             QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
         
     def set_unsaved_state(self):
         self.is_saved = False
 
+    def rename(self):
+        items = []
+        for i in range(self.listwidget.count()):
+            items.append(self.listwidget.item(i).text())
+        if not self.listwidget.item(self.listwidget.currentRow()) == None:
+            item = self.listwidget.item(self.listwidget.currentRow()).text()
+            if item or not item == NoneType:
+                text, ok = QInputDialog.getText(self, 'EDocBook', 'Enter new document name:')
+                if ok and not text == "":
+                    if text in items:
+                        if self.is_multimedia_available:
+                            fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-Warning.ogg") 
+                            url = QtCore.QUrl.fromLocalFile(fullpath)
+                            content = QtMultimedia.QMediaContent(url)
+                            player = QtMultimedia.QMediaPlayer()
+                            player.setMedia(content)
+                            player.play()
+                        QMessageBox.warning(self, "Error", "Notebook already exists.")
+                    else:
+                        try:
+                            os.rename("./notebooks/"+item, "./notebooks/"+text)
+                            self.sync()
+                        except Exception as e:
+                            if self.is_multimedia_available:
+                                fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-App-Error-Critical.ogg") 
+                                url = QtCore.QUrl.fromLocalFile(fullpath)
+                                content = QtMultimedia.QMediaContent(url)
+                                player = QtMultimedia.QMediaPlayer()
+                                player.setMedia(content)
+                                player.play()
+                            QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
+
     def new(self):
         items = []
         for i in range(self.listwidget.count()):
             items.append(self.listwidget.item(i).text())
-        text, ok = QInputDialog.getText(self, 'Text Input Dialog', 'Enter document name:')
+        text, ok = QInputDialog.getText(self, 'EDocBook', 'Enter document name:')
         if ok and not text == "":
             if text in items:
+                if self.is_multimedia_available:
+                    fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-Warning.ogg") 
+                    url = QtCore.QUrl.fromLocalFile(fullpath)
+                    content = QtMultimedia.QMediaContent(url)
+                    player = QtMultimedia.QMediaPlayer()
+                    player.setMedia(content)
+                    player.play()
                 QMessageBox.warning(self, "Error", "Notebook already exists.")
             else:
                 try:
                     Path('./notebooks/'+text).touch()
                     self.sync()
                 except Exception as e:
+                    if self.is_multimedia_available:
+                        fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-App-Error-Critical.ogg") 
+                        url = QtCore.QUrl.fromLocalFile(fullpath)
+                        content = QtMultimedia.QMediaContent(url)
+                        player = QtMultimedia.QMediaPlayer()
+                        player.setMedia(content)
+                        player.play()
                     QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
 
     def delete(self):
@@ -166,6 +248,13 @@ class Window(QWidget):
                     os.unlink("./notebooks/"+item)
                     self.sync()
         except Exception as e:
+            if self.is_multimedia_available:
+                fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-App-Error-Critical.ogg") 
+                url = QtCore.QUrl.fromLocalFile(fullpath)
+                content = QtMultimedia.QMediaContent(url)
+                player = QtMultimedia.QMediaPlayer()
+                player.setMedia(content)
+                player.play()
             QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
     
     def sync(self):
@@ -204,6 +293,14 @@ class Window(QWidget):
 
     def closeEvent(self, event): 
         if self.is_saved == False:
+            if self.is_multimedia_available:
+                fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-Warning.ogg") 
+                url = QtCore.QUrl.fromLocalFile(fullpath)
+                content = QtMultimedia.QMediaContent(url)
+                player = QtMultimedia.QMediaPlayer()
+                player.setMedia(content)
+                player.play()
+
             can_exit = QMessageBox.question(self,'', "Save before exiting?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
             if can_exit == QMessageBox.Yes:
                 event.ignore()("")
@@ -220,6 +317,14 @@ class Window(QWidget):
     
     def back_confirm(self):
         if self.is_saved == False:
+            if self.is_multimedia_available:
+                fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-Warning.ogg") 
+                url = QtCore.QUrl.fromLocalFile(fullpath)
+                content = QtMultimedia.QMediaContent(url)
+                player = QtMultimedia.QMediaPlayer()
+                player.setMedia(content)
+                player.play()
+
             can_exit = QMessageBox.question(self,'', "Save before exiting?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
             if can_exit == QMessageBox.Yes:
                 self.sync()
