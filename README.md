@@ -1,6 +1,6 @@
 ## EDocBook
 
-EDocBook is an open-source notebook app. It is incomplete right now, but it will be an amazing simple text editor. You will be more orginized by seeing all your notes in one place. Bored of searching documents on your computer? Don't worry EDocBook will automatically decide where to save your notes and then it will be much easier to find them.
+EDocBook is an open-source notebook app. It is an amazing simple text editor. You will be more orginized by seeing all your notes in one place. Bored of searching documents on your computer? Don't worry EDocBook will automatically decide where to save your notes and then it will be much easier to find them.
 
 **Installing instructions:**
 
