@@ -150,6 +150,10 @@ class Window(QWidget):
         self.help_action_qt.triggered.connect(self.info_qt)
         self.actionHelp.addAction(self.help_action)
         self.actionHelp.addAction(self.help_action_qt)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.update_menus)
+        self.timer.setInterval(100)
+        self.timer.start()
         self.sync()
 
     def clicked(self, qmodelindex):
@@ -168,6 +172,26 @@ class Window(QWidget):
                 player.play()
             QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
 
+    def update_menus(self):
+        print("updated")
+        if self.listwidget.item(self.listwidget.currentRow()) == None:
+            self.rename_action.setEnabled(False)
+            self.rename_button.setEnabled(False)
+            self.del_button.setEnabled(False)
+            self.delete_action.setEnabled(False)
+            self.rename_action.setEnabled(False)
+            self.rename_button.setEnabled(False)
+            self.open_action.setEnabled(False)
+            self.open_button.setEnabled(False)
+        else:
+            self.rename_action.setEnabled(True)
+            self.rename_button.setEnabled(True)
+            self.del_button.setEnabled(True)
+            self.delete_action.setEnabled(True)
+            self.rename_action.setEnabled(True)
+            self.rename_button.setEnabled(True)
+            self.open_action.setEnabled(True)
+            self.open_button.setEnabled(True)
     def open(self):
         try:
             if not self.listwidget.item(self.listwidget.currentRow()) == None:
