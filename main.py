@@ -39,6 +39,7 @@ class Window(QWidget):
         if not os.path.isdir("notebooks"):
             os.mkdir("notebooks")
         self.layout = QGridLayout()
+        self.layout.setContentsMargins(0,0,0,0)
         self.setLayout(self.layout)
         self.listwidget = QListWidget()
         self.listwidget.installEventFilter(self)
@@ -49,6 +50,7 @@ class Window(QWidget):
         self.textarea.setHidden(True)
         self.layout.addWidget(self.textarea,1,0)
         self.mylayout = QHBoxLayout()
+        self.mylayout.setContentsMargins(8,2,8,8)
         self.open_button=QPushButton()
         self.open_button.setText("Open")
         if sys.platform == "linux" or sys.platform == "linux2":
