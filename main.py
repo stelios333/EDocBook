@@ -1,4 +1,3 @@
-from ast import Name
 from pathlib import Path
 from types import NoneType
 from PyQt5.QtWidgets import *
