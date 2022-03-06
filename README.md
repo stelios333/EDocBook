@@ -9,3 +9,6 @@ EDocBook is an open-source notebook app. It is an amazing simple text editor. Yo
  3. Clone the repository
  4. Run main.py
  5. Have fun!
+ 
+
+ Note: Sounds by Oxygen sound theme.
