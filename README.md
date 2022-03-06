@@ -10,7 +10,7 @@ EDocBook is an open-source notebook app. It is an amazing simple text editor. Yo
  5. Have fun!
  
  **Or**\
- Just download executable files from [Releases](https://github.com/stelios333/EDocBook/releases/tag/v1.0.0) (Available only for linux & windows 64-bit)
+ Just download executable files from [Releases](https://github.com/stelios333/EDocBook/releases/tag/v1.0.0) (Only available for linux & windows 64-bit)
 
 **Credits:**\
 Sounds by Oxygen sound theme.\
