@@ -4,11 +4,14 @@ EDocBook is an open-source notebook app. It is an amazing simple text editor. Yo
 
 **Installing instructions:**
 
- 1. Install python 3.7+ on Linux (recommended), MacOS (not tested) or Windows
- 2. Install PyQt5 by using `pip install PyQt5` or if you are using a Debian-based linux distubrition run `sudo apt install python3-pyqt5` (and optionally `sudo apt install python3-pyqt5.qtmultimedia`)
+ 1. Install python 3.7+ on Linux (recommended), MacOS (not tested) or Windows (tested, also recommended)
+ 2. Install PyQt5 by using `pip install PyQt5` (works both in Windows & Linux) or if you are using a Debian-based linux distubrition run `sudo apt install python3-pyqt5` (and optionally `sudo apt install python3-pyqt5.qtmultimedia`)
  3. Clone the repository
  4. Run main.py
  5. Have fun!
  
 
- Note: Sounds by Oxygen sound theme.
+Credits:
+
+Sounds by Oxygen sound theme.
+Icons from breeze icon theme.

@@ -26,6 +26,8 @@ class Window(QWidget):
         except NameError:
             self.is_multimedia_available = False
 
+        if sys.platform == "win32":
+            self.is_multimedia_available = False
         self.opened_file = ""
         self.setWindowTitle("EDocBook")
         self.setWindowIcon(QtGui.QIcon('logo.png'))
@@ -68,7 +70,9 @@ class Window(QWidget):
         self.rename_button.setText("Rename")
         if sys.platform == "linux" or sys.platform == "linux2":
             self.rename_button.setIcon(QtGui.QIcon.fromTheme("edit-rename"))
-    
+        else:
+            self.rename_button.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-edit.svg")))
+
         self.rename_button.clicked.connect(self.rename)
         self.del_button=QPushButton()
         self.del_button.setText("Delete")
@@ -104,7 +108,7 @@ class Window(QWidget):
         if sys.platform == "linux" or sys.platform == "linux2":
             self.open_action.setIcon(QtGui.QIcon.fromTheme("document-open"))
         else:
-            self.open_action.setIcon(qApp.style().standardIcon(QStyle.SP_ArrowForward)) 
+            self.open_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-open-folder.svg")))
             
         self.open_action.triggered.connect(self.open)
         self.open_action.setShortcut("Ctrl+O")
@@ -116,10 +120,14 @@ class Window(QWidget):
         self.rename_action.triggered.connect(self.rename)
         if sys.platform == "linux" or sys.platform == "linux2":
             self.rename_action.setIcon(QtGui.QIcon.fromTheme("edit-rename"))
+        else:
+            self.rename_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-edit.svg")))
         self.rename_action.setShortcut("Ctrl+R")
         self.new_action = QAction("New", self)
         if sys.platform == "linux" or sys.platform == "linux2":
             self.new_action.setIcon(QtGui.QIcon.fromTheme("document-new"))
+        else:
+            self.new_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-new.svg")))
         self.new_action.triggered.connect(self.new)
         self.new_action.setShortcut("Ctrl+N")
         self.quit_action = QAction("Quit", self)
@@ -142,7 +150,7 @@ class Window(QWidget):
         if sys.platform == "linux" or sys.platform == "linux2":
             self.help_action.setIcon(QtGui.QIcon.fromTheme("help-about"))
         else:
-            self.help_action.setIcon(qApp.style().standardIcon(QStyle.SP_TitleBarContextHelpButton)) 
+            self.help_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("help-about.svg")))
             
         self.help_action.setShortcut("Ctrl+I")
         self.help_action.triggered.connect(self.info)
