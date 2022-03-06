@@ -9,7 +9,8 @@ except ImportError:
     pass
 import sys, os
 
-
+if sys.platform == "darwin":
+    print("Warning: MacOS isn't supported")
 
 def _files(path):
     for file in os.listdir(path):
