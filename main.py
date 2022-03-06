@@ -1,5 +1,4 @@
 from pathlib import Path
-from types import NoneType
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui, QtCore
 try:
@@ -187,7 +186,7 @@ class Window(QWidget):
         try:
             if not self.listwidget.item(self.listwidget.currentRow()) == None:
                 item = self.listwidget.item(self.listwidget.currentRow()).text()
-                if item or not item == NoneType:
+                if item:
                     self.enter_edit_mode(item)
         except Exception as e:
             if self.is_multimedia_available:
@@ -241,7 +240,7 @@ class Window(QWidget):
             if self.opened_file == "":
                 if not self.listwidget.item(self.listwidget.currentRow()) == None:
                     item = self.listwidget.item(self.listwidget.currentRow()).text()
-                    if item or not item == NoneType:
+                    if item:
                         _file = open("./notebooks/"+item, "r")
                         file_contents = _file.read()
                         _file.close()
@@ -299,7 +298,7 @@ class Window(QWidget):
         try:
             if not self.listwidget.item(self.listwidget.currentRow()) == None:
                 item = self.listwidget.item(self.listwidget.currentRow()).text()
-                if item or not item == NoneType:
+                if item:
                     self.enter_edit_mode(item)
         except Exception as e:
             if self.is_multimedia_available:
@@ -320,7 +319,7 @@ class Window(QWidget):
             items.append(self.listwidget.item(i).text())
         if not self.listwidget.item(self.listwidget.currentRow()) == None:
             item = self.listwidget.item(self.listwidget.currentRow()).text()
-            if item or not item == NoneType:
+            if item:
                 text, ok = QInputDialog.getText(self, 'EDocBook', 'Enter new document name:')
                 if ok and not text == "":
                     if text in items:
@@ -379,7 +378,7 @@ class Window(QWidget):
         try:
             if not self.listwidget.item(self.listwidget.currentRow()) == None:
                 item = self.listwidget.item(self.listwidget.currentRow()).text()
-                if item or not item == NoneType:
+                if item:
                     os.unlink("./notebooks/"+item)
                     self.sync()
         except Exception as e:
