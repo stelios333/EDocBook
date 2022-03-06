@@ -129,6 +129,12 @@ class Window(QWidget):
             self.new_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-new.svg")))
         self.new_action.triggered.connect(self.new)
         self.new_action.setShortcut("Ctrl+N")
+        self.export_action = QAction("Export", self)
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.export_action.setIcon(QtGui.QIcon.fromTheme("document-export"))
+        else:
+            self.export_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-export.svg")))
+        self.export_action.triggered.connect(self.export)
         self.quit_action = QAction("Quit", self)
         self.quit_action.setShortcut("Ctrl+Q")
         self.quit_action.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCloseButton))
@@ -136,6 +142,7 @@ class Window(QWidget):
         self.actionFile.addAction(self.open_action)
         self.actionFile.addAction(self.new_action)
         self.actionFile.addAction(self.rename_action)
+        self.actionFile.addAction(self.export_action)
         self.actionFile.addAction(self.delete_action)
         self.sync_action = QAction("Sync Files", self)
         self.sync_action.setIcon(qApp.style().standardIcon(QStyle.SP_BrowserReload))
@@ -179,6 +186,40 @@ class Window(QWidget):
                 player.setMedia(content)
                 player.play()
             QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
+    def export(self):
+        try:
+            if self.opened_file == "":
+                if not self.listwidget.item(self.listwidget.currentRow()) == None:
+                    item = self.listwidget.item(self.listwidget.currentRow()).text()
+                    if item or not item == NoneType:
+                        _file = open("./notebooks/"+item, "r")
+                        file_contents = _file.read()
+                        _file.close()
+                        options = QFileDialog.Options()
+                        options |= QFileDialog.DontUseNativeDialog
+                        fileName, ok = QFileDialog.getSaveFileName(self,"QFileDialog.getOpenFileName()", "","Text Files (*.txt);;All Files (*)", options=options)
+                        if ok:
+                            file_ = open(fileName, "w")
+                            file_.write(file_contents)
+                            file_.close()
+            else:
+                file_contents = self.textarea.toPlainText()
+                options = QFileDialog.Options()
+                options |= QFileDialog.DontUseNativeDialog
+                fileName, ok = QFileDialog.getSaveFileName(self,"QFileDialog.getOpenFileName()", "","Text Files (*.txt);;All Files (*)", options=options)
+                if ok:
+                    file_ = open(fileName, "w")
+                    file_.write(file_contents)
+                    file_.close()
+        except Exception as e:
+            if self.is_multimedia_available:
+                fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-App-Error-Critical.ogg") 
+                url = QtCore.QUrl.fromLocalFile(fullpath)
+                content = QtMultimedia.QMediaContent(url)
+                player = QtMultimedia.QMediaPlayer()
+                player.setMedia(content)
+                player.play()
+            QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
 
     def update_menus(self):
         if self.listwidget.item(self.listwidget.currentRow()) == None:
@@ -190,15 +231,20 @@ class Window(QWidget):
             self.rename_button.setEnabled(False)
             self.open_action.setEnabled(False)
             self.open_button.setEnabled(False)
+            if self.opened_file == "":
+                self.export_action.setEnabled(False)
         else:
-            self.rename_action.setEnabled(True)
-            self.rename_button.setEnabled(True)
-            self.del_button.setEnabled(True)
-            self.delete_action.setEnabled(True)
-            self.rename_action.setEnabled(True)
-            self.rename_button.setEnabled(True)
-            self.open_action.setEnabled(True)
-            self.open_button.setEnabled(True)
+            if self.opened_file == "":
+                self.rename_action.setEnabled(True)
+                self.rename_button.setEnabled(True)
+                self.del_button.setEnabled(True)
+                self.delete_action.setEnabled(True)
+                self.rename_action.setEnabled(True)
+                self.rename_button.setEnabled(True)
+                self.open_action.setEnabled(True)
+                self.open_button.setEnabled(True)
+            self.export_action.setEnabled(True)
+
     def open(self):
         try:
             if not self.listwidget.item(self.listwidget.currentRow()) == None:
@@ -342,7 +388,7 @@ class Window(QWidget):
 
             can_exit = QMessageBox.question(self,'', "Save before exiting?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
             if can_exit == QMessageBox.Yes:
-                event.ignore()("")
+                event.ignore()
                 self.sync()
                 sys.exit()
                 
@@ -400,6 +446,7 @@ class Window(QWidget):
         self.open_action.setEnabled(False)
         self.new_action.setEnabled(False)
         self.delete_action.setEnabled(False)
+        self.rename_action.setEnabled(False)
         self.new_button.setHidden(True)
         self.del_button.setHidden(True)
         self.open_button.setHidden(True)
@@ -422,11 +469,13 @@ class Window(QWidget):
         self.open_action.setEnabled(True)
         self.new_action.setEnabled(True)
         self.delete_action.setEnabled(True)
+        self.rename_action.setEnabled(True)
         self.new_button.setHidden(False)
         self.del_button.setHidden(False)
         self.open_button.setHidden(False)
         self.setWindowTitle("EDocBook")
         self.textarea.setPlainText("")
+        self.sync()
         self.opened_file = ""
 
 
