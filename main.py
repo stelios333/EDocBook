@@ -134,7 +134,15 @@ class Window(QWidget):
             self.export_action.setIcon(QtGui.QIcon.fromTheme("document-export"))
         else:
             self.export_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-export.svg")))
+
         self.export_action.triggered.connect(self.export)
+        self.import_action = QAction("Import", self)
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.import_action.setIcon(QtGui.QIcon.fromTheme("document-import"))
+        else:
+            self.import_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-import.svg")))
+            
+        self.import_action.triggered.connect(self.import_)
         self.quit_action = QAction("Quit", self)
         self.quit_action.setShortcut("Ctrl+Q")
         self.quit_action.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCloseButton))
@@ -142,13 +150,15 @@ class Window(QWidget):
         self.actionFile.addAction(self.open_action)
         self.actionFile.addAction(self.new_action)
         self.actionFile.addAction(self.rename_action)
-        self.actionFile.addAction(self.export_action)
         self.actionFile.addAction(self.delete_action)
         self.sync_action = QAction("Sync Files", self)
         self.sync_action.setIcon(qApp.style().standardIcon(QStyle.SP_BrowserReload))
         self.sync_action.setShortcut("Ctrl+S")
         self.sync_action.triggered.connect(self.sync)
         self.actionFile.addAction(self.sync_action)
+        self.actionFile.addSeparator()
+        self.actionFile.addAction(self.import_action)
+        self.actionFile.addAction(self.export_action)
         self.actionFile.addSeparator()
         self.actionFile.addAction(self.quit_action)
         self.actionHelp = self.menubar.addMenu("Help")
@@ -186,6 +196,44 @@ class Window(QWidget):
                 player.setMedia(content)
                 player.play()
             QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
+
+    def import_(self):
+        items = []
+        for i in range(self.listwidget.count()):
+            items.append(self.listwidget.item(i).text())
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, ok = QFileDialog.getOpenFileName(self,"Import File", "","Text Files (*.txt);;All Files (*)", options=options)
+        if ok and not fileName == "":
+            notebook_name = os.path.split(fileName)[1].split(".")[0]
+            if notebook_name in items:
+                if self.is_multimedia_available:
+                    fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-Warning.ogg") 
+                    url = QtCore.QUrl.fromLocalFile(fullpath)
+                    content = QtMultimedia.QMediaContent(url)
+                    player = QtMultimedia.QMediaPlayer()
+                    player.setMedia(content)
+                    player.play()
+                QMessageBox.warning(self, "Error", "Notebook already exists.")
+            else:
+                try:
+                    file = open("./notebooks/"+notebook_name, "w")
+                    _file = open(fileName, "r")
+                    _file_content = _file.read()
+                    _file.close()
+                    file.write(_file_content)
+                    file.close()
+                    self.sync()
+                except Exception as e:
+                    if self.is_multimedia_available:
+                        fullpath = QtCore.QDir.current().absoluteFilePath("Oxygen-Sys-App-Error-Critical.ogg") 
+                        url = QtCore.QUrl.fromLocalFile(fullpath)
+                        content = QtMultimedia.QMediaContent(url)
+                        player = QtMultimedia.QMediaPlayer()
+                        player.setMedia(content)
+                        player.play()
+                    QMessageBox.critical(self, "An internal error occured", "Exact error: "+str(e))
+
     def export(self):
         try:
             if self.opened_file == "":
@@ -197,7 +245,7 @@ class Window(QWidget):
                         _file.close()
                         options = QFileDialog.Options()
                         options |= QFileDialog.DontUseNativeDialog
-                        fileName, ok = QFileDialog.getSaveFileName(self,"QFileDialog.getOpenFileName()", "","Text Files (*.txt);;All Files (*)", options=options)
+                        fileName, ok = QFileDialog.getSaveFileName(self,"Export File", "","Text Files (*.txt);;All Files (*)", options=options)
                         if ok:
                             file_ = open(fileName, "w")
                             file_.write(file_contents)
@@ -368,7 +416,7 @@ class Window(QWidget):
         dlg.setLayout(self.layout2)
         info_label = QLabel()
 
-        info_label.setText("EDocBook is an amazing simple text editor,\nwhich gathers all your notes in one place.\nIt is made by Stelios333 in 2022.\nThe project is open source and it is under the GPLv3+ License")
+        info_label.setText("EDocBook is an amazing simple text editor, which gathers all your notes in one place.\nIt is made by Stelios333 in 2022.\nThe project is open source and it is under the GPLv3+ License")
         self.layout2.addWidget(info_label,0,0)
         self.close_button = QPushButton()
         self.close_button.setText("Close")
@@ -445,6 +493,7 @@ class Window(QWidget):
         self.textarea.setHidden(False)
         self.open_action.setEnabled(False)
         self.new_action.setEnabled(False)
+        self.import_action.setEnabled(False)
         self.delete_action.setEnabled(False)
         self.rename_action.setEnabled(False)
         self.new_button.setHidden(True)
@@ -467,6 +516,7 @@ class Window(QWidget):
         self.listwidget.setHidden(False)
         self.textarea.setHidden(True)
         self.open_action.setEnabled(True)
+        self.import_action.setEnabled(True)
         self.new_action.setEnabled(True)
         self.delete_action.setEnabled(True)
         self.rename_action.setEnabled(True)
