@@ -54,7 +54,7 @@ class Window(QWidget):
         if sys.platform == "linux" or sys.platform == "linux2":
             self.open_button.setIcon(QtGui.QIcon.fromTheme("document-open"))
         else:
-            self.open_button.setIcon(qApp.style().standardIcon(QStyle.SP_ArrowForward)) 
+            self.open_button.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-open-folder.svg")))
 
         self.open_button.clicked.connect(self.open)
         self.new_button=QPushButton()
@@ -62,7 +62,7 @@ class Window(QWidget):
         if sys.platform == "linux" or sys.platform == "linux2":
             self.new_button.setIcon(QtGui.QIcon.fromTheme("document-new"))
         else:
-            self.new_button.setText("+ New")
+            self.new_button.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-new.svg")))
 
         self.new_button.clicked.connect(self.new)
         self.rename_button=QPushButton()
