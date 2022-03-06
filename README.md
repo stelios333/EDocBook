@@ -14,4 +14,5 @@ EDocBook is an open-source notebook app. It is an amazing simple text editor. Yo
 Credits:
 
 Sounds by Oxygen sound theme.
+
 Icons from breeze icon theme.
