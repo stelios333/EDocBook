@@ -79,7 +79,7 @@ class Window(QWidget):
         if sys.platform == "linux" or sys.platform == "linux2":
             self.del_button.setIcon(QtGui.QIcon.fromTheme("edit-delete"))
         else:
-            self.del_button.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-delete.svg")))
+            self.del_button.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("edit-delete.svg")))
         self.del_button.clicked.connect(self.delete)
         self.back_button=QPushButton()
         self.back_button.setText("Back")
