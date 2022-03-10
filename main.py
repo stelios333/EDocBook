@@ -129,7 +129,7 @@ class Window(QWidget):
         if sys.platform == "linux" or sys.platform == "linux2":
             self.delete_action.setIcon(QtGui.QIcon.fromTheme("edit-delete"))
         else:
-            self.delete_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-delete.svg")))
+            self.delete_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("edit-delete.svg")))
         self.delete_action.setShortcut("Ctrl+D")
         self.rename_action = QAction("Rename", self)
         self.rename_action.triggered.connect(self.rename)
