@@ -76,16 +76,25 @@ class Window(QWidget):
         self.rename_button.clicked.connect(self.rename)
         self.del_button=QPushButton()
         self.del_button.setText("Delete")
-        self.del_button.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCancelButton))
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.del_button.setIcon(QtGui.QIcon.fromTheme("edit-delete"))
+        else:
+            self.del_button.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-delete.svg")))
         self.del_button.clicked.connect(self.delete)
         self.back_button=QPushButton()
         self.back_button.setText("Back")
-        self.back_button.setIcon(qApp.style().standardIcon(QStyle.SP_ArrowBack))
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.back_button.setIcon(QtGui.QIcon.fromTheme("go-previous"))
+        else:
+            self.back_button.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("go-previous.svg")))
         self.back_button.setHidden(True)
         self.back_button.clicked.connect(self.back_confirm) 
         self.sync_button=QPushButton()
         self.sync_button.setText("Sync File")
-        self.sync_button.setIcon(qApp.style().standardIcon(QStyle.SP_BrowserReload))
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.sync_button.setIcon(QtGui.QIcon.fromTheme("folder-sync"))
+        else:
+            self.sync_button.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("folder-sync.svg")))
         self.sync_button.setHidden(True)
         self.sync_button.clicked.connect(self.sync) 
         self.mylayout.addWidget(self.back_button) 
@@ -99,7 +108,10 @@ class Window(QWidget):
         self.layout.addWidget(self.menubar, 0, 0)
         self.actionFile = self.menubar.addMenu("File")
         self.exit_action = QAction("Back", self)
-        self.exit_action.setIcon(qApp.style().standardIcon(QStyle.SP_ArrowBack))
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.exit_action.setIcon(QtGui.QIcon.fromTheme("go-previous"))
+        else:
+            self.exit_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("go-previous.svg")))
         self.exit_action.setShortcut("Ctrl+E")
         self.exit_action.setEnabled(False)
         self.exit_action.triggered.connect(self.back_confirm)
@@ -114,7 +126,10 @@ class Window(QWidget):
         self.open_action.setShortcut("Ctrl+O")
         self.delete_action = QAction("Delete", self)
         self.delete_action.triggered.connect(self.delete)
-        self.delete_action.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCancelButton))
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.delete_action.setIcon(QtGui.QIcon.fromTheme("edit-delete"))
+        else:
+            self.delete_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("document-delete.svg")))
         self.delete_action.setShortcut("Ctrl+D")
         self.rename_action = QAction("Rename", self)
         self.rename_action.triggered.connect(self.rename)
@@ -146,14 +161,20 @@ class Window(QWidget):
         self.import_action.triggered.connect(self.import_)
         self.quit_action = QAction("Quit", self)
         self.quit_action.setShortcut("Ctrl+Q")
-        self.quit_action.setIcon(qApp.style().standardIcon(QStyle.SP_DialogCloseButton))
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.quit_action.setIcon(QtGui.QIcon.fromTheme("application-exit"))
+        else:
+            self.quit_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("application-exit.svg")))
         self.quit_action.triggered.connect(self.quit)
         self.actionFile.addAction(self.open_action)
         self.actionFile.addAction(self.new_action)
         self.actionFile.addAction(self.rename_action)
         self.actionFile.addAction(self.delete_action)
         self.sync_action = QAction("Sync Files", self)
-        self.sync_action.setIcon(qApp.style().standardIcon(QStyle.SP_BrowserReload))
+        if sys.platform == "linux" or sys.platform == "linux2":
+            self.sync_action.setIcon(QtGui.QIcon.fromTheme("folder-sync"))
+        else:
+            self.sync_action.setIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("folder-sync.svg")))
         self.sync_action.setShortcut("Ctrl+S")
         self.sync_action.triggered.connect(self.sync)
         self.actionFile.addAction(self.sync_action)
