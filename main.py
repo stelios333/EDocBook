@@ -1,4 +1,5 @@
 from pathlib import Path
+import warnings
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui, QtCore
 try:
@@ -8,7 +9,7 @@ except ImportError:
 import sys, os
 
 if sys.platform == "darwin":
-    print("Warning: MacOS isn't supported")
+    print("\033[33mWarning: MacOS isn't supported\033[0m")
 
 def _files(path):
     for file in os.listdir(path):
@@ -28,7 +29,7 @@ class Window(QWidget):
             self.is_multimedia_available = False
         self.opened_file = ""
         self.setWindowTitle("EDocBook")
-        self.setWindowIcon(QtGui.QIcon('logo.png'))
+        self.setWindowIcon(QtGui.QIcon(QtCore.QDir.current().absoluteFilePath("logo.png")))
         qtRectangle = self.frameGeometry()
         centerPoint = QDesktopWidget().availableGeometry().center()
         qtRectangle.moveCenter(centerPoint)
@@ -432,18 +433,24 @@ class Window(QWidget):
     def info(self):
         dlg = QDialog(self)
         dlg.setWindowTitle("About")
-        dlg.resize(400, 100)
         self.layout2 = QGridLayout()
         self.layout2.setContentsMargins(8,8,8,8)
         dlg.setLayout(self.layout2)
+        mylayout = QHBoxLayout()
+        icon_label = QLabel()
+        pixmap = QtGui.QPixmap(QtCore.QDir.current().absoluteFilePath("help-about.png"))
+        icon_label.setPixmap(pixmap)
         info_label = QLabel()
 
         info_label.setText("EDocBook is an amazing simple text editor, which gathers all your notes in one place.\nIt is made by Stelios333 in 2022.\nThe project is open source and it is under the GPLv3+ License")
-        self.layout2.addWidget(info_label,0,0)
+        mylayout.addWidget(icon_label)
+        mylayout.addWidget(info_label)
         self.close_button = QPushButton()
         self.close_button.setText("Close")
         self.close_button.clicked.connect(dlg.close)
-        self.layout2.addWidget(self.close_button)
+        self.layout2.addLayout(mylayout,0,0)
+        self.layout2.addWidget(self.close_button,1,0)
+        dlg.setFixedSize(610, 130)
         dlg.exec()
 
     def closeEvent(self, event): 
